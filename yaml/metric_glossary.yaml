@@ -1,0 +1,577 @@
+metrics:
+  gmv:
+    description: Gross Merchandise Value — total item_price from Delivered + Shipped
+      orders
+    tables:
+    - orders
+    - order_items
+    formula_logic:
+      join: oi.order_id = o.order_id
+      filter: o.order_status IN ('Delivered', 'Shipped')
+      aggregation: SUM(COALESCE(oi.item_price, 0))
+    type: financial
+    aliases:
+    - gross merchandise value
+    - total gmv
+    - gmv
+    - gross sales
+    - total gross sales
+    - total value of orders
+    - merchandise value
+    - how much we grossed
+  realized_revenue:
+    description: Revenue from Delivered orders only — use o.final_payable for order-level,
+      oi.item_price for item-level
+    tables:
+    - orders
+    - order_items
+    formula_logic:
+      join: oi.order_id = o.order_id
+      filter: o.order_status = 'Delivered'
+      aggregation: SUM(COALESCE(oi.item_price, 0))
+    order_level_aggregation: SUM(COALESCE(o.final_payable, 0))
+    type: financial
+    aliases:
+    - revenue
+    - realized revenue
+    - actual revenue
+    - income
+    - sales
+    - total sales
+    - what is the sales
+    - earnings
+    - earned
+    - earn
+    - collected
+    - money collected
+    - money came in
+    - we made
+    - what we made
+    - sales figures
+    - top sellers
+    - sellers by revenue
+    - sellers by sales
+    - best sellers
+    - seller revenue
+    - total income
+    - turnover
+    - how much we made
+    - money earned
+    - how much earned
+    - sales numbers
+    - revenue numbers
+    - top line
+    - gross revenue
+    - kitna mila
+    - kitna hua
+    - mila kitna
+    - sales kitni
+  net_revenue:
+    description: Revenue after subtracting completed refunds. refunds.refunded_amount
+      is the correct column.
+    tables:
+    - orders
+    - order_items
+    - returns
+    - refunds
+    formula_logic:
+      join: oi.order_id = o.order_id LEFT JOIN returns r ON r.order_item_id = oi.order_item_id
+        LEFT JOIN refunds rf ON rf.return_id = r.return_id
+      filter: o.order_status = 'Delivered'
+      aggregation: SUM(COALESCE(oi.item_price, 0)) - COALESCE(SUM(CASE WHEN rf.refund_status
+        = 'Completed' THEN rf.refunded_amount ELSE 0 END), 0)
+    type: financial
+    aliases:
+    - net revenue
+    - revenue after refunds
+    - actual income
+    - net sales
+  discount_impact:
+    description: Total discount given on orders — use o.discount_amount
+    tables:
+    - orders
+    formula_logic:
+      filter: o.order_status IN ('Delivered', 'Shipped')
+      aggregation: SUM(COALESCE(o.discount_amount, 0))
+    type: financial
+    aliases:
+    - discount
+    - discounts given
+    - total discount
+    - discount amount
+    - promo impact
+  avg_order_value:
+    description: Average final_payable per delivered order
+    tables:
+    - orders
+    formula_logic:
+      filter: o.order_status = 'Delivered'
+      aggregation: ROUND(SUM(COALESCE(o.final_payable, 0)) / NULLIF(COUNT(DISTINCT
+        o.order_id), 0), 2)
+    type: financial
+    aliases:
+    - aov
+    - average order value
+    - avg order
+    - order average
+    - average basket size
+    - average order
+    - mean order value
+    - typical order value
+    - order value average
+  refund_amount:
+    description: Total refunded to customers. Column is refunded_amount (NOT refund_amount).
+      Only Completed refunds.
+    tables:
+    - returns
+    - refunds
+    formula_logic:
+      join: rf.return_id = r.return_id
+      filter: rf.refund_status = 'Completed'
+      aggregation: SUM(COALESCE(rf.refunded_amount, 0))
+    type: financial
+    aliases:
+    - refunds
+    - total refunds
+    - refunded amount
+    - money refunded
+    - refund total
+    - how much refunded
+    - money given back
+    - amount refunded
+    - refund amount
+    - total refund amount
+    - refund value
+    - refund money
+  seller_settlement:
+    description: 'Total net_payable to sellers. Status values: Paid, Processed, Pending,
+      On Hold. Column is net_payable.'
+    tables:
+    - seller_settlements
+    - order_items
+    formula_logic:
+      join: ss.order_item_id = oi.order_item_id
+      filter: ss.settlement_status IN ('Paid', 'Processed')
+      aggregation: SUM(COALESCE(ss.net_payable, 0))
+    type: financial
+    aliases:
+    - settlement
+    - seller payout
+    - seller payment
+    - amount settled
+    - seller settlement
+  commission_earned:
+    description: Platform commission earned from sellers. Column is commission_amount
+      in seller_settlements.
+    tables:
+    - seller_settlements
+    formula_logic:
+      filter: ss.settlement_status IN ('Paid', 'Processed')
+      aggregation: SUM(COALESCE(ss.commission_amount, 0))
+    type: financial
+    aliases:
+    - commission
+    - platform commission
+    - commission earned
+    - commission amount
+  loss:
+    description: Business loss from Cancelled and Returned order items. Uses oi.item_price.
+    tables:
+    - orders
+    - order_items
+    formula_logic:
+      join: oi.order_id = o.order_id
+      filter: o.order_status IN ('Cancelled', 'Returned')
+      aggregation: SUM(COALESCE(oi.item_price, 0))
+    type: financial
+    aliases:
+    - loss
+    - losses
+    - losing money
+    - negative revenue
+    - why loss
+    - faced loss
+    - facing loss
+    - bleeding money
+    - money lost
+    - we lost
+    - how much lost
+    - loss hua
+    - loss ho raha
+    - numbers down
+    - why down
+    - financial loss
+    - losing
+    - loss this month
+    - show loss
+    - total loss
+  total_orders:
+    description: Count of all orders placed
+    tables:
+    - orders
+    formula_logic:
+      filter: 1=1
+      aggregation: COUNT(DISTINCT o.order_id)
+    type: operational
+    aliases:
+    - orders
+    - order count
+    - number of orders
+    - total orders
+    - how many orders
+    - order volume
+    - orders placed
+    - orders received
+    - kitne orders
+    - order traffic
+    - orders came in
+    - orders this month
+  cancelled_orders:
+    description: Count of cancelled orders. order_status = 'Cancelled'
+    tables:
+    - orders
+    formula_logic:
+      filter: o.order_status = 'Cancelled'
+      aggregation: COUNT(DISTINCT o.order_id)
+    type: operational
+    aliases:
+    - cancellations
+    - cancelled orders
+    - order cancellations
+    - how many cancelled
+    - cancel count
+    - dropped orders
+    - unfulfilled orders
+    - orders cancelled
+    - kitne cancel
+    - cancel hue
+    - orders not fulfilled
+    - orders failed
+    - orders that failed
+    - cancellation count
+  return_rate:
+    description: '% of delivered order items that were returned. Returns join via
+      order_item_id (NOT order_id).'
+    tables:
+    - order_items
+    - returns
+    formula_logic:
+      join: r.order_item_id = oi.order_item_id LEFT JOIN orders o ON o.order_id =
+        oi.order_id
+      filter: o.order_status = 'Delivered'
+      aggregation: ROUND(COUNT(DISTINCT r.return_id) * 100.0 / NULLIF(COUNT(DISTINCT
+        oi.order_item_id), 0), 2)
+    type: operational
+    aliases:
+    - return rate
+    - returns percentage
+    - '% returned'
+    - return ratio
+  total_returns:
+    description: 'Count of returns. return_type can be Return or Exchange. return_status:
+      Completed, Picked Up, Rejected, Initiated, Received.'
+    tables:
+    - returns
+    formula_logic:
+      filter: r.return_type = 'Return'
+      aggregation: COUNT(DISTINCT r.return_id)
+    type: operational
+    aliases:
+    - returns
+    - total returns
+    - number of returns
+    - how many returns
+    - return count
+    - no of returns
+    - items came back
+    - came back
+    - sent back
+    - products sent back
+    - items sent back
+    - returned items
+    - items returned
+    - goods returned
+    - customer returns
+    - return volume
+    - how many returned
+    - kitne returns
+    - kitne returns aaye
+    - return mila kitna
+    - wapas aaye kitne
+  delivery_performance:
+    description: On-time delivery rate. Compare actual_delivery_date vs promised_delivery_date
+      in shipments.
+    tables:
+    - shipments
+    formula_logic:
+      filter: sh.delivery_status = 'Delivered'
+      aggregation: ROUND(COUNT(CASE WHEN sh.actual_delivery_date <= sh.promised_delivery_date
+        THEN 1 END) * 100.0 / NULLIF(COUNT(sh.shipment_id), 0), 2)
+    type: operational
+    aliases:
+    - delivery performance
+    - on time delivery
+    - delivery rate
+    - late deliveries
+    - courier performance
+    - delayed deliveries
+    - delivery success rate
+    - delivery success
+    - on-time delivery
+    - delivery delays
+    - delivery issues
+    - shipmnt delays
+    - shipment delays
+  inventory_health:
+    description: 'Available vs damaged stock. Columns: available_qty, reserved_qty,
+      damaged_qty in inventory.'
+    tables:
+    - inventory
+    formula_logic:
+      filter: 1=1
+      aggregation: SUM(inv.available_qty), SUM(inv.reserved_qty), SUM(inv.damaged_qty)
+    type: operational
+    aliases:
+    - inventory
+    - stock
+    - available stock
+    - damaged stock
+    - inventory health
+    - stock levels
+  payment_failures:
+    description: Count of failed payments. payment_status = 'Failed' in payments table.
+    tables:
+    - payments
+    formula_logic:
+      filter: pay.payment_status = 'Failed'
+      aggregation: COUNT(DISTINCT pay.payment_id)
+    type: operational
+    aliases:
+    - payment failure
+    - payment failures
+    - failed payment
+    - failed payments
+    - payment failed
+    - payment not completed
+    - payment issues
+    - failed transactions
+    - transactions failed
+    - payment problems
+    - payment errors
+    - paymet failures
+    - payment not working
+  payment_success:
+    description: Count or amount of completed payments. payment_status = 'Completed'.
+    tables:
+    - payments
+    formula_logic:
+      filter: pay.payment_status = 'Completed'
+      aggregation: COUNT(DISTINCT pay.payment_id)
+    type: operational
+    aliases:
+    - payment success
+    - successful payments
+    - completed payments
+    - payments received
+  non_returnable_products:
+    description: Products where is_returnable = FALSE in products table.
+    tables:
+    - products
+    formula_logic:
+      filter: p.is_returnable = FALSE
+      aggregation: COUNT(DISTINCT p.product_id)
+    type: operational
+    aliases:
+    - non returnable
+    - non-returnable
+    - not returnable
+    - which products are non returnable
+    - products non returnable
+    - is_returnable false
+  inactive_sellers:
+    description: Sellers where is_active = FALSE.
+    tables:
+    - sellers
+    formula_logic:
+      filter: s.is_active = FALSE
+      aggregation: COUNT(DISTINCT s.seller_id)
+    type: operational
+    aliases:
+    - inactive sellers
+    - inactive seller
+    - which sellers are inactive
+    - sellers inactive
+    - not active sellers
+  high_risk_sellers:
+    description: Sellers with risk_flag = 'High'.
+    tables:
+    - sellers
+    formula_logic:
+      filter: s.risk_flag = 'High'
+      aggregation: COUNT(DISTINCT s.seller_id)
+    type: operational
+    aliases:
+    - high risk sellers
+    - risky sellers
+    - risk flag high
+    - sellers at risk
+  cancellation_rate:
+    description: '% of total orders that were cancelled'
+    tables:
+    - orders
+    formula_logic:
+      filter: 1=1
+      aggregation: ROUND(COUNT(CASE WHEN o.order_status = 'Cancelled' THEN 1 END)
+        * 100.0 / NULLIF(COUNT(DISTINCT o.order_id), 0), 2)
+    type: operational
+    aliases:
+    - cancellation rate
+    - cancel rate
+    - '% cancelled'
+    - cancellation percentage
+    - how many cancelled
+    - cancellation ratio
+  new_customers:
+    description: Customers who signed up in the given period. Use c.signup_date for
+      time filter.
+    tables:
+    - customers
+    formula_logic:
+      filter: c.signup_date >= date_trunc('month', current_date)
+      aggregation: COUNT(DISTINCT c.customer_id)
+    type: operational
+    aliases:
+    - new customers
+    - new customer
+    - new signups
+    - customer acquisition
+    - customers acquired
+    - newly joined
+  exchange_count:
+    description: Count of exchanges (return_type = 'Exchange')
+    tables:
+    - returns
+    formula_logic:
+      filter: r.return_type = 'Exchange'
+      aggregation: COUNT(DISTINCT r.return_id)
+    type: operational
+    aliases:
+    - exchanges
+    - exchange count
+    - most exchanges
+    - number of exchanges
+    - products have most exchanges
+    - exchange orders
+  payment_count:
+    description: Count of payments — filter by payment_status for success/failure
+    tables:
+    - payments
+    formula_logic:
+      filter: 1=1
+      aggregation: COUNT(DISTINCT pay.payment_id)
+    type: operational
+    aliases:
+    - payments
+    - number of payments
+    - how many payments
+    - payment count
+    - payments completed
+    - most used payment
+    - which payment method
+    - payment method used
+    - gateway failures
+    - which gateway
+    - show payments
+    - failed upi
+    - upi payments
+  damaged_stock:
+    description: Total damaged quantity in inventory. Uses inv.damaged_qty
+    tables:
+    - inventory
+    formula_logic:
+      filter: inv.damaged_qty > 0
+      aggregation: SUM(inv.damaged_qty)
+    type: operational
+    aliases:
+    - damaged goods
+    - damaged stock
+    - damaged inventory
+    - most damaged
+    - damaged products
+    - damaged items
+    - damaged qty
+  zero_stock:
+    description: Products with zero available inventory. Uses inv.available_qty =
+      0
+    tables:
+    - inventory
+    - products
+    formula_logic:
+      filter: inv.available_qty = 0
+      aggregation: COUNT(DISTINCT inv.product_id)
+    type: operational
+    aliases:
+    - zero stock
+    - out of stock
+    - zero available
+    - no stock
+    - zero available qty
+    - products with zero available qty
+    - products out of stock
+  shipment_count:
+    description: Count of shipments — filter by delivery_status for in-transit, delivered,
+      etc.
+    tables:
+    - shipments
+    formula_logic:
+      filter: 1=1
+      aggregation: COUNT(DISTINCT sh.shipment_id)
+    type: operational
+    aliases:
+    - shipments
+    - in transit shipments
+    - show shipments
+    - out for delivery
+    - delivery count
+    - shipment count
+    - show in transit
+    - deliveries today
+    - out for delivery shipments
+    - bluedart delivery
+    - delivery success rate
+    - courier success rate
+  seller_performance:
+    description: Seller performance summary — revenue, returns, settlement by seller
+    tables:
+    - orders
+    - order_items
+    - sellers
+    formula_logic:
+      join: oi.order_id = o.order_id LEFT JOIN sellers s ON s.seller_id = oi.seller_id
+      filter: o.order_status = 'Delivered'
+      aggregation: SUM(COALESCE(oi.item_price, 0))
+    type: financial
+    aliases:
+    - seller performance
+    - performance by region
+    - seller performance by region
+    - sellers performance
+    - how sellers are performing
+  season_sales:
+    description: Sales grouped by product season. Uses p.season column.
+    tables:
+    - orders
+    - order_items
+    - products
+    formula_logic:
+      join: oi.order_id = o.order_id INNER JOIN products p ON p.product_id = oi.product_id
+      filter: o.order_status = 'Delivered'
+      aggregation: SUM(COALESCE(oi.item_price, 0))
+    type: financial
+    aliases:
+    - by season
+    - season wise
+    - products by season
+    - seasonal sales
+    - season breakdown
+    - show products by season

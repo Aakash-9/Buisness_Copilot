@@ -1,0 +1,61 @@
+rules:
+  select:
+    - "Never use SELECT *"
+    - "Always select only columns needed for the question"
+    - "Always alias tables using the standard alias map"
+    - "Use COALESCE(value, 0) for any nullable numeric column"
+    - "Never expose customer PII: do not select c.email, c.phone, c.address"
+
+  joins:
+    - "Always use explicit JOIN ... ON syntax"
+    - "Never use implicit joins (comma-separated tables in FROM)"
+    - "Use INNER JOIN for required relationships (orders→order_items)"
+    - "Use LEFT JOIN for optional relationships (returns, refunds, shipments, payments, settlements)"
+    - "returns must always join via order_items.order_item_id = returns.order_item_id"
+    - "refunds must always join via returns.return_id = refunds.return_id"
+    - "sellers must join via order_items.seller_id = sellers.seller_id"
+
+  column_names:
+    - "Use refunds.refunded_amount (NOT refund_amount)"
+    - "Use seller_settlements.net_payable (NOT settlement_amount)"
+    - "Use orders.final_payable for order-level revenue"
+    - "Use order_items.item_price for item-level revenue"
+    - "Use seller_settlements.commission_amount for platform commission"
+    - "Use orders.discount_amount for discounts"
+    - "Use orders.total_amount for pre-discount order value"
+
+  status_values:
+    orders_order_status: ["Delivered", "Shipped", "Cancelled", "Returned"]
+    refunds_refund_status: ["Completed", "Failed", "Processing"]
+    returns_return_status: ["Completed", "Picked Up", "Rejected", "Initiated", "Received"]
+    returns_return_type: ["Return", "Exchange"]
+    payments_payment_status: ["Completed", "Failed"]
+    shipments_delivery_status: ["Delivered", "In Transit", "Out for Delivery"]
+    seller_settlements_settlement_status: ["Paid", "Processed", "Pending", "On Hold"]
+    inventory_movements_movement_type: ["INBOUND", "OUTBOUND"]
+
+  aggregation:
+    - "Always GROUP BY all non-aggregated selected columns"
+    - "Use COUNT(DISTINCT ...) for unique counts"
+    - "Use ROUND(..., 2) for monetary and percentage values"
+    - "Use NULLIF(denominator, 0) to prevent division by zero"
+    - "Use COALESCE(SUM(...), 0) for sums that may be NULL"
+
+  ordering:
+    - "Always add ORDER BY <main_metric> DESC"
+    - "Use LIMIT 20 unless user specifies otherwise"
+
+  formatting:
+    - "Write SQL keywords in uppercase (SELECT, FROM, WHERE, JOIN, etc.)"
+    - "Each major clause on a new line"
+    - "Indent JOIN conditions with 2 spaces"
+
+  safety:
+    - "Never use DELETE, UPDATE, INSERT, DROP, TRUNCATE, ALTER"
+    - "Queries must be read-only SELECT statements only"
+
+output_format:
+  - "Return ONLY the SQL query"
+  - "No explanation text before or after"
+  - "No markdown code fences (no backticks)"
+  - "No natural language reasoning"

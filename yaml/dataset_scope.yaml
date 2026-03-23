@@ -1,0 +1,125 @@
+# Updated for regular directory
+# ─────────────────────────────────────────────────────────────
+# DATASET SCOPE — defines exactly what exists in your database
+# The system uses this to reject queries about things not in data
+# ─────────────────────────────────────────────────────────────
+
+# From products table (visible in your screenshots)
+product_categories:
+  Topwear:
+    sub_categories: [Kurtas, Sweatshirts, Shirts, T-Shirts]
+    brands: [Libas, Allen Solly, W, H&M, Roadster, Adidas, Zara]
+
+  Bottomwear:
+    sub_categories: [Shorts, Jeans, Trousers]
+    brands: [W, Peter England, Zara, Roadster, Levi's]
+
+  Footwear:
+    sub_categories: [Sports Shoes, Casual Shoes, Formal Shoes, Sandals]
+    brands: [Biba, Adidas, Nike, Puma]
+
+  Accessories:
+    sub_categories: [Belts, Watches, Bags, Sunglasses]
+    brands: [Titan, Levi's, Allen Solly, Zara]
+
+  Dresses:
+    sub_categories: [Bodycon Dress, Maxi Dress, Casual Dress]
+    brands: [HERE&NOW, W, Biba, Zara]
+
+# From customers table
+customer_segments:
+  loyalty_tiers: [Bronze, Silver, Gold, Platinum]
+  age_groups: [18-24, 25-34, 35-44, 45-54, 55+]
+  genders: [Male, Female]
+  cities: [Mumbai, Delhi, Bangalore, Hyderabad, Chennai, Pune, Ahmedabad,
+           Kolkata, Jaipur, Surat, Lucknow, Jodhpur, Dehradun]
+  states: [Maharashtra, Karnataka, Telangana, Tamil Nadu, Gujarat,
+           Rajasthan, Uttarakhand, West Bengal, Uttar Pradesh,
+          'Jammu and Kashmir']
+
+# From orders table
+order_attributes:
+  statuses: [Delivered, Shipped, Cancelled, Returned]
+  channels: [App, Website, Mobile Web]
+  payment_modes: [COD, Prepaid]
+
+# From payments table
+payment_attributes:
+  methods: [COD, Credit Card, UPI, Wallet, Net Banking]
+  gateways: [COD, PhonePe, PayU, Stripe, Razorpay, Paytm]
+  statuses: [Completed, Failed]
+
+# From sellers table
+seller_attributes:
+  types: [Individual, Authorized Reseller, Brand Official]
+  regions: [North, South, East, West, Pan-India]
+  risk_flags: [Low, Medium, High]
+
+# From shipments table
+shipment_attributes:
+  couriers: [BlueDart, Delhivery, Shadowfax, Ecom Express, DTDC]
+  statuses: [Delivered, In Transit, Out for Delivery]
+
+# From returns table
+return_attributes:
+  types: [Return, Exchange]
+  statuses: [Completed, Picked Up, Rejected, Initiated, Received]
+  reasons: [Color Different from Image, Late Delivery, Size Mismatch,
+            Defective Product, Quality Not as Expected, Wrong Item Delivered,
+            Changed Mind, Better Price Available]
+
+# From refunds table
+refund_attributes:
+  methods: [Original Payment Method, Myntra Credit, Bank Transfer]
+  statuses: [Completed, Failed, Processing]
+
+# From seller_settlements table
+settlement_attributes:
+  statuses: [Paid, Processed, Pending, On Hold]
+
+# From inventory table
+inventory_attributes:
+  fields: [available_qty, reserved_qty, damaged_qty]
+
+# From inventory_movements table
+movement_attributes:
+  types: [INBOUND, OUTBOUND]
+
+# ─────────────────────────────────────────────────────────────
+# WHAT IS NOT IN THE DATASET — common things users might ask
+# that simply don't exist
+# ─────────────────────────────────────────────────────────────
+not_in_dataset:
+  product_categories_not_present:
+    - Electronics
+    - Furniture
+    - Home Decor
+    - Kitchen
+    - Appliances
+    - Groceries
+    - Books
+    - Toys
+    - Sports Equipment
+    - Beauty
+    - Health
+    - Automotive
+    - Garden
+    - Pet Supplies
+    - Stationery
+    - Door Mats
+    - Carpets
+    - Curtains
+    - Mobile Phones
+    - Laptops
+    - Tablets
+    - Headphones
+    - Cameras
+
+  metrics_not_available:
+    - profit_margin         # no cost data in dataset
+    - customer_lifetime_value  # no historical cohort data
+    - market_share          # no competitor data
+    - employee_data         # no HR tables
+    - tax_data              # no tax tables
+    - shipping_cost         # not a column in shipments
+    - vendor_cost           # not in dataset
