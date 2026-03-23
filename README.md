@@ -7,22 +7,64 @@ Production-grade Natural Language to SQL pipeline using Groq (Mixtral-8x7B) + YA
 ## Project Structure
 
 ```
-nl2sql/
+Business_Copilot/
 ├── yaml/
-│   ├── metric_glossary.yaml         # Business metric definitions
-│   ├── join_path_specification.yaml # Strict join rules
-│   ├── sql_generation_standards.yaml# SQL output rules
-│   └── time_filter_governance.yaml  # Time filter logic
+│   ├── dataset_scope.yaml             # Defines database schema and available data
+│   ├── join_path_specification.yaml   # Strict join rules for tables
+│   ├── metric_glossary.yaml           # Business metric definitions
+│   ├── README.md                      # Documentation for YAML files
+│   ├── sql_generation_standards.yaml  # SQL output rules and standards
+│   └── time_filter_governance.yaml    # Time filter logic and rules
 │
 ├── core/
-│   ├── context_selector.py          # Extracts relevant YAML context per query
-│   ├── prompt_builder.py            # Builds structured LLM prompt
-│   ├── sql_generator.py             # Calls Groq API
-│   └── validator.py                 # Validates SQL before execution
+│   ├── context_selector.py            # Extracts relevant YAML context per query
+│   ├── filter_extractor.py            # Extracts filters from queries
+│   ├── insight_generator.py           # Generates insights from results
+│   ├── intent_detector.py             # Detects user intent
+│   ├── llm_normalizer.py              # Normalizes LLM responses
+│   ├── prompt_builder.py              # Builds structured LLM prompt
+│   ├── query_normalizer.py            # Normalizes user queries
+│   ├── query_preprocessor.py          # Preprocesses queries
+│   ├── scope_validator.py             # Validates query scope
+│   ├── semantic_interpreter.py        # Interprets semantic meaning
+│   ├── spell_corrector.py             # Corrects spelling in queries
+│   ├── sql_generator.py               # Calls Groq API to generate SQL
+│   ├── supabase_executor.py           # Executes SQL on Supabase
+│   └── validator.py                   # Validates SQL before execution
 │
-├── main.py                          # Entry point
-├── requirements.txt
-└── README.md
+├── main.py                            # Entry point
+├── requirements.txt                   # Python dependencies
+├── .gitignore                         # Git ignore rules
+└── README.md                          # This file
+```
+
+---
+
+## Workflow Diagram
+
+```mermaid
+flowchart TD
+    A[User Query] --> B[query_preprocessor.py]
+    B --> C[intent_detector.py]
+    C --> D[context_selector.py]
+    D --> E[prompt_builder.py]
+    E --> F[sql_generator.py - Groq API]
+    F --> G[validator.py]
+    G --> H[Clean SQL Output]
+    
+    subgraph "YAML Business Logic"
+        Y1[dataset_scope.yaml]
+        Y2[join_path_specification.yaml]
+        Y3[metric_glossary.yaml]
+        Y4[sql_generation_standards.yaml]
+        Y5[time_filter_governance.yaml]
+    end
+    
+    D --> Y1
+    D --> Y2
+    D --> Y3
+    D --> Y4
+    D --> Y5
 ```
 
 ---
@@ -68,19 +110,16 @@ python main.py
 
 ## How It Works
 
-```
-User Question
-     ↓
-context_selector.py   → reads YAMLs, extracts only what's relevant
-     ↓
-prompt_builder.py     → builds a tight, structured prompt
-     ↓
-Groq API (Mixtral)    → generates SQL (temperature=0.0)
-     ↓
-validator.py          → checks join rules, safety, business logic
-     ↓
-Clean SQL Output
-```
+The system processes natural language queries through multiple stages:
+
+1. **Query Preprocessing**: Cleans and normalizes the input query
+2. **Intent Detection**: Determines the type of query and required metrics
+3. **Context Selection**: Extracts relevant business logic from YAML files
+4. **Prompt Building**: Constructs a structured prompt for the LLM
+5. **SQL Generation**: Uses Groq API to generate SQL (temperature=0.0 for determinism)
+6. **Validation**: Checks SQL against business rules and safety constraints
+
+The YAML files define the business logic, ensuring queries are safe, relevant, and follow company standards.
 
 ---
 
@@ -117,7 +156,7 @@ your_metric:
 ## Extending to Full Analytics
 
 Next steps:
-1. Execute SQL on Supabase → add `executor.py`
-2. Pass results to LLM → generate business insights
+1. Execute SQL on Supabase → add `executor.py` (already present as supabase_executor.py)
+2. Pass results to LLM → generate business insights (insight_generator.py present)
 3. Add a FastAPI layer → REST API
 4. Add a Streamlit UI → frontend
