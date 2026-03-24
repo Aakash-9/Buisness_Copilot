@@ -155,8 +155,4 @@ your_metric:
 
 ## Extending to Full Analytics
 
-Next steps:
-1. Execute SQL on Supabase → add `executor.py` (already present as supabase_executor.py)
-2. Pass results to LLM → generate business insights (insight_generator.py present)
-3. Add a FastAPI layer → REST API
-4. Add a Streamlit UI → frontend
+
